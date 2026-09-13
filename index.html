@@ -1,228 +1,90 @@
-<!DOCTYPE html>
+import http.server
+import os
+import subprocess
+import sys
+import threading
+import time
+import webbrowser
+import socketserver
+
+CODESPACE = "miniature-fiesta-wrqvp4jqxxx5257rj"
+SSH_PORT = 5900
+HTTP_PORT = 8080
+WS_PORT = 6080
+
+HTML_CONTENT = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO Meta Tags Optimized for Global Remote Tech Services -->
-    <title>Remote IT Support, Cybersecurity Defense & Software Engineering</title>
-    <meta name="description" content="On-demand remote IT support, virtual cybersecurity hardening, and custom software engineering. Professional technical solutions delivered entirely online, anywhere worldwide.">
-    
+    <title>Codespace VNC Viewer</title>
     <style>
-        /* Modern, Clean Global Tech Styling */
-        :root {
-            --primary: #0056b3;
-            --dark: #121212;
-            --light: #f8f9fa;
-            --accent: #28a745;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            margin: 0;
-            padding: 0;
-            background-color: var(--light);
-        }
-        header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .cta-btn {
-            background-color: var(--primary);
-            color: white;
-            text-decoration: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .hero {
-            background: linear-gradient(rgba(0,86,179,0.05), rgba(0,86,179,0.1));
-            padding: 5rem 0;
-            text-align: center;
-        }
-        .hero h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin: 3rem 0;
-        }
-        .service-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border-top: 4px solid var(--primary);
-        }
-        .calculator-box, .contact-box {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin: 3rem 0;
-        }
-        select, input, textarea {
-            width: 100%;
-            padding: 0.8rem;
-            margin: 0.5rem 0 1.5rem 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background-color: #004085; }
-        .price-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--accent);
-            margin-top: 1rem;
-        }
-        footer {
-            background: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 2.5rem 0;
-            margin-top: 4rem;
-        }
+        body { background: #111; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        #screenContainer { width: 1024px; height: 768px; border: 2px solid #444; margin: 20px auto; background: #000; }
     </style>
 </head>
 <body>
-
-    <!-- Header Section with Remote Focus -->
-    <header>
-        <div class="container header-flex">
-            <strong> Global Tech Support & Programming</strong>
-            <a href="#contact" class="cta-btn"> Request Remote Support</a>
-        </div>
-    </header>
-
-    <!-- Global/Wide Hero Introduction -->
-    <section class="hero">
-        <div class="container">
-            <h1>On-Demand Remote IT Support, Cybersecurity & Software Programming</h1>
-            <p style="font-size:1.25rem; max-width:750px; margin:0 auto; color: #555;">
-                Professional, accessible tech solutions delivered completely online. From virtual troubleshooting and anti-hacking defenses to custom code deployment—anywhere in the world.
-            </p>
-            <p style="font-weight: bold; color: var(--accent); margin-top: 1.5rem;"> 100% Virtual • Secured Remote Sessions • Transparent Pricing</p>
-        </div>
-    </section>
-
-    <!-- Core Virtual Service Sections -->
-    <main class="container">
-        <div class="services-grid">
-            <div class="service-card">
-                <h2>Remote IT Support</h2>
-                <p>Virtual system optimization, software troubleshooting, OS configuration, and continuous remote monitoring to keep your digital environment running smoothly.</p>
-            </div>
-            <div class="service-card">
-                <h2>Online Cybersecurity</h2>
-                <p>Digital threat assessment, secure network configuration audits, malicious malware extraction, and system hardening to protect your data from hacking attempts.</p>
-            </div>
-            <div class="service-card">
-                <h2>Software Engineering</h2>
-                <p>Custom script architectures, cloud integrations, web structures, and workflow automation programming built to your exact specifications.</p>
-            </div>
-        </div>
-
-        <!-- Interactive Project Calculator -->
-        <div class="calculator-box">
-            <h2>Calculate Virtual Project Baseline</h2>
-            <p>Select a digital service category to see the remote-tier pricing estimate:</p>
-            <label for="service-select">What digital solution do you require?</label>
-            <select id="service-select" onchange="calculateEstimate()">
-                <option value="0">-- Select a Remote Service --</option>
-                <option value="55">Remote Tech Consultation / Auditing</option>
-                <option value="95">Virtual Malware Removal & Security Hardening</option>
-                <option value="120">Remote OS Configuration & IT Troubleshooting</option>
-                <option value="175">Custom Scripting / Software Automation Project</option>
-            </select>
-            <div id="price-result" class="price-display">Estimated Baseline: $0</div>
-            <p style="font-size:0.9rem; color:#666; margin-top:0.5rem;">*Final project costs vary depending on structural or system complexity. Estimates are fully finalized before code or support execution begins.</p>
-        </div>
-
-        <!-- Global Contact Form -->
-        <div class="contact-box" id="contact">
-            <h2>Initiate a Secure Tech Request</h2>
-            <form id="contact-form" onsubmit="handleFormSubmit(event)">
-                <label for="customer-name">Name / Business Identity</label>
-                <input type="text" id="customer-name" placeholder="Alex Morgan" required>
-
-                <label for="customer-email">Email Address</label>
-                <input type="email" id="customer-email" placeholder="alex@example.com" required>
-
-                <label for="issue-description">Detail your remote infrastructure issue or software project parameters:</label>
-                <textarea id="issue-description" rows="4" placeholder="Provide system logs, code goals, or a description of your tech issue..." required></textarea>
-
-                <button type="submit">Submit Digital Request</button>
-            </form>
-            <div id="form-feedback" style="margin-top: 1rem; font-weight: bold; color: var(--primary);"></div>
-        </div>
-    </main>
-
-    <!-- Footer Area without geographical boundaries -->
-    <footer>
-        <div class="container">
-            <p><strong>Global Tech Support & Programming</strong> - Online Operations Worldwide</p>
-            <p>Operating Hours: Mon - Sat: 08:00 - 18:00 UTC</p>
-            <p style="font-size: 0.8rem; color: #777;">&copy; 2026 Global Tech Support. Powered securely by GitHub Pages.</p>
-        </div>
-    </footer>
-
-    <!-- JavaScript Interactive Functionality -->
-    <script>
-        function calculateEstimate() {
-            const selectElement = document.getElementById('service-select');
-            const selectedPrice = selectElement.value;
-            const displayElement = document.getElementById('price-result');
-            
-            if (selectedPrice === "0") {
-                displayElement.innerText = "Estimated Baseline: $0";
-            } else {
-                displayElement.innerText = `Estimated Baseline: $${selectedPrice}`;
-            }
-        }
-
-        function handleFormSubmit(event) {
-            event.preventDefault(); 
-            
-            const name = document.getElementById('customer-name').value;
-            const feedback = document.getElementById('form-feedback');
-            
-            feedback.innerText = `Thank you, ${name}. Your remote project ticket has been queued. A technician will contact you via email shortly.`;
-            feedback.style.color = "var(--accent)";
-            
-            document.getElementById('contact-form').reset();
-            document.getElementById('price-result').innerText = "Estimated Baseline: $0";
-        }
+    <h2>Codespace Desktop Viewer</h2>
+    <div id="screenContainer"></div>
+    <script type="module">
+        import RFB from 'https://cdn.jsdelivr.net/npm/@novnc/novnc@latest/core/rfb.js';
+        const targetUrl = `ws://${window.location.hostname}:""" + str(WS_PORT) + """`;
+        const container = document.getElementById('screenContainer');
+        const rfb = new RFB(container, targetUrl, { credentials: { password: "" } });
+        rfb.scaleViewport = true;
+        rfb.resizeSession = true;
     </script>
 </body>
-</html>
+</html>"""
+
+def run_http_server():
+    os.makedirs("vnc_root", exist_ok=True)
+    with open(os.path.join("vnc_root", "index.html"), "w") as f:
+        f.write(HTML_CONTENT)
+    
+    os.chdir("vnc_root")
+    handler = http.server.SimpleHTTPRequestHandler
+    with socketserver.TCPServer(("", HTTP_PORT), handler) as httpd:
+        print(f"HTTP server running at http://localhost:{HTTP_PORT}")
+        httpd.serve_forever()
+
+def main():
+    try:
+        import websockify
+    except ImportError:
+        print("Installing websockify package...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "websockify"])
+
+    print(f"Establishing SSH tunnel to Codespace ({CODESPACE})...")
+    ssh_cmd = [
+        "gh", "codespace", "ssh", 
+        "--codespace", CODESPACE, 
+        "--", "-N", "-L", f"{SSH_PORT}:127.0.0.1:{SSH_PORT}"
+    ]
+    ssh_process = subprocess.Popen(ssh_cmd)
+    time.sleep(3)
+
+    # Start built-in HTTP server in a separate background thread
+    threading.Thread(target=run_http_server, daemon=True).start()
+
+    print(f"Starting WebSocket-to-TCP bridge on port {WS_PORT}...")
+    ws_cmd = [
+        sys.executable, "-m", "websockify", 
+        str(WS_PORT), 
+        f"127.0.0.1:{SSH_PORT}"
+    ]
+    ws_process = subprocess.Popen(ws_cmd)
+
+    url = f"http://localhost:{HTTP_PORT}/index.html"
+    print(f"VNC Viewer ready! Opening {url}")
+    webbrowser.open(url)
+
+    try:
+        ssh_process.wait()
+        ws_process.wait()
+    except KeyboardInterrupt:
+        print("\nShutting down services...")
+        ssh_process.terminate()
+        ws_process.terminate()
+
+if __name__ == "__main__":
+    main()
